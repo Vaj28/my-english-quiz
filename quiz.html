@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A/An Quiz with Explanations</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 900px; /* Increased max-width for explanations */
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .quiz-item {
+            display: flex;
+            align-items: flex-start; /* Align items to the start for better multi-line explanation */
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .quiz-item:last-child {
+            border-bottom: none;
+        }
+        .quiz-item label {
+            margin-right: 15px;
+            cursor: pointer;
+            white-space: nowrap; /* Prevent "a" or "an" from wrapping */
+        }
+        .quiz-item input[type="radio"] {
+            margin-right: 5px;
+            transform: scale(1.2);
+            flex-shrink: 0; /* Prevent radio button from shrinking */
+        }
+        .word-container {
+            flex-grow: 1;
+            display: flex;
+            align-items: center; /* Align word and number */
+        }
+        .word-container .number {
+            margin-right: 5px;
+        }
+        .word-container .word {
+            font-weight: bold;
+        }
+        .feedback-container {
+            margin-left: 20px;
+            flex-basis: 350px; /* Give more space for feedback and explanation */
+            flex-shrink: 0;
+        }
+        .feedback {
+            font-weight: bold;
+            display: block; /* Make feedback take full width */
+        }
+        .explanation {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #score-container {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .disabled-radios input[type="radio"] {
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fill in the blanks using "a" or "an"</h1>
+        <form id="quizForm">
+            </form>
+        <div class="button-container">
+            <button type="button" onclick="checkAnswers()">Check Answers</button>
+            <button type="button" onclick="resetQuiz()" style="background-color: #e74c3c; margin-left: 15px;">Reset Quiz</button>
+        </div>
+        <div id="score-container"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            { word: "alligator", answer: "an", explanation: "คำว่า 'alligator' ขึ้นต้นด้วยเสียงสระเหมือนเสียง อ.อ่าง (ออ-ลิ-เก-เทอร์) จึงใช้ 'an'" },
+            { word: "envelope", answer: "an", explanation: "คำว่า 'envelope' ขึ้นต้นด้วยเสียงสระเหมือนเสียง อ.อ่าง (เอ็น-วะ-โลป) จึงใช้ 'an'" },
+            { word: "textbook", answer: "a", explanation: "คำว่า 'textbook' ขึ้นต้นด้วยเสียงพยัญชนะ (เท็กซ-ทฺ-บุ๊ก) จึงใช้ 'a'" },
+            { word: "hour", answer: "an", explanation: "คำว่า 'hour' แม้จะขึ้นต้นด้วย 'h' แต่ 'h' ไม่ออกเสียง (เสียงเป็น 'อาวร์') จึงถือเป็นเสียงสระเหมือนเสียง อ.อ่าง ใช้ 'an'" },
+            { word: "table", answer: "a", explanation: "คำว่า 'table' ขึ้นต้นด้วยเสียงพยัญชนะ (เท-เบิล) จึงใช้ 'a'" },
+            { word: "actor", answer: "an", explanation: "คำว่า 'actor' ขึ้นต้นด้วยเสียงสระเหมือนเสียง อ.อ่าง (แอ็ก-เทอร์) จึงใช้ 'an'" },
+            { word: "bucket", answer: "a", explanation: "คำว่า 'bucket' ขึ้นต้นด้วยเสียงพยัญชนะ (บัก-คิท) จึงใช้ 'a'" },
+            { word: "hour", answer: "an", explanation: "คำว่า 'hour' แม้จะขึ้นต้นด้วย 'h' แต่ 'h' ไม่ออกเสียง (เสียงเป็น 'อาวร์') จึงถือเป็นเสียงสระเหมือนเสียง อ.อ่าง ใช้ 'an'" },
+            { word: "dustpan", answer: "a", explanation: "คำว่า 'dustpan' ขึ้นต้นด้วยเสียงพยัญชนะ (ดัสทฺ-แพน) จึงใช้ 'a'" },
+            { word: "eagle", answer: "an", explanation: "คำว่า 'eagle' ขึ้นต้นด้วยเสียงสระเหมือนเสียง อ.อ่าง (อี-เกิล) จึงใช้ 'an'" },
+            { word: "television", answer: "a", explanation: "คำว่า 'television' ขึ้นต้นด้วยเสียงพยัญชนะ (เท-เล-วิ-ชัน) จึงใช้ 'a'" },
+            { word: "ostrich", answer: "an", explanation: "คำว่า 'ostrich' ขึ้นต้นด้วยเสียงสระเหมือนเสียง อ.อ่าง (ออส-ทริช) จึงใช้ 'an'" },
+            { word: "umbrella", answer: "an", explanation: "คำว่า 'umbrella' ขึ้นต้นด้วยเสียงสระเหมือนเสียง อ.อ่าง (อัม-เบรล-ล่า) จึงใช้ 'an'" },
+            { word: "oyster", answer: "an", explanation: "คำว่า 'oyster' ขึ้นต้นด้วยเสียงสระเหมือนเสียง อ.อ่าง (ออย-สเทอร์) จึงใช้ 'an'" },
+            { word: "uniform", answer: "a", explanation: "คำว่า 'uniform' แม้จะขึ้นต้นด้วย 'u' แต่ 'u' ออกเสียงเหมือน 'ยู' (yoo-ni-form) ซึ่งเป็นเสียงพยัญชนะ จึงใช้ 'a' (คล้ายคำว่า 'university')" },
+            { word: "teacher", answer: "a", explanation: "คำว่า 'teacher' ขึ้นต้นด้วยเสียงพยัญชนะ (ที-เชอร์) จึงใช้ 'a'" },
+            { word: "clock", answer: "a", explanation: "คำว่า 'clock' ขึ้นต้นด้วยเสียงพยัญชนะ (คล็อก) จึงใช้ 'a'" },
+            { word: "octopus", answer: "an", explanation: "คำว่า 'octopus' ขึ้นต้นด้วยเสียงสระเหมือนเสียง อ.อ่าง (อ็อก-โท-ปัส) จึงใช้ 'an'" },
+            { word: "calendar", answer: "a", explanation: "คำว่า 'calendar' ขึ้นต้นด้วยเสียงพยัญชนะ (แคล-เลน-ดาร์) จึงใช้ 'a'" },
+            { word: "laptop", answer: "a", explanation: "คำว่า 'laptop' ขึ้นต้นด้วยเสียงพยัญชนะ (แล็บ-ท็อป) จึงใช้ 'a'" }
+        ];
+
+        const quizForm = document.getElementById('quizForm');
+        const scoreContainer = document.getElementById('score-container');
+        let answered = false;
+
+        function generateQuiz() {
+            quizForm.innerHTML = ''; // Clear previous items if any
+            quizData.forEach((item, index) => {
+                const quizItem = document.createElement('div');
+                quizItem.classList.add('quiz-item');
+                quizItem.innerHTML = `
+                    <label>
+                        <input type="radio" name="q${index}" value="a"> a
+                    </label>
+                    <label>
+                        <input type="radio" name="q${index}" value="an"> an
+                    </label>
+                    <div class="word-container">
+                        <span class="number">${index + 1}.</span> <span class="word">________ ${item.word}</span>
+                    </div>
+                    <div id="feedback-container-${index}" class="feedback-container">
+                        <span id="feedback-${index}" class="feedback"></span>
+                        <span id="explanation-${index}" class="explanation"></span>
+                    </div>
+                `;
+                quizForm.appendChild(quizItem);
+            });
+            scoreContainer.textContent = '';
+            answered = false;
+        }
+
+        function checkAnswers() {
+            if (answered) return;
+            answered = true;
+
+            let score = 0;
+            quizForm.classList.add('disabled-radios');
+
+            quizData.forEach((item, index) => {
+                const selectedOption = document.querySelector(`input[name="q${index}"]:checked`);
+                const feedbackSpan = document.getElementById(`feedback-${index}`);
+                const explanationSpan = document.getElementById(`explanation-${index}`);
+
+                if (selectedOption) {
+                    if (selectedOption.value === item.answer) {
+                        feedbackSpan.textContent = "ถูกต้อง! ";
+                        feedbackSpan.classList.add('correct');
+                        feedbackSpan.classList.remove('incorrect');
+                    } else {
+                        feedbackSpan.textContent = `ผิดพลาด! (คำตอบที่ถูกต้องคือ: ${item.answer}) `;
+                        feedbackSpan.classList.add('incorrect');
+                        feedbackSpan.classList.remove('correct');
+                    }
+                } else {
+                    feedbackSpan.textContent = "ยังไม่ได้เลือกคำตอบ ";
+                    feedbackSpan.classList.add('incorrect');
+                    feedbackSpan.classList.remove('correct');
+                }
+
+                // Always show explanation after checking
+                explanationSpan.textContent = item.explanation;
+
+                // Only add score if correct and an option was selected
+                if (selectedOption && selectedOption.value === item.answer) {
+                    score++;
+                }
+            });
+
+            scoreContainer.textContent = `คะแนนรวมของคุณ: ${score} / ${quizData.length}`;
+        }
+
+        function resetQuiz() {
+            generateQuiz();
+            quizForm.classList.remove('disabled-radios');
+        }
+
+        document.addEventListener('DOMContentLoaded', generateQuiz);
+    </script>
+</body>
+</html>
