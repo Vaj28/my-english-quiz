@@ -8,13 +8,18 @@
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            background-color: #f4f4f4;
+            /* ลบ background-color: #f4f4f4; ออก หรือให้เป็นสีสำรองถ้าภาพโหลดไม่ได้ */
+            background-image: url('background.jpg'); /* ระบุรูปภาพพื้นหลัง */
+            background-size: cover; /* ทำให้รูปภาพคลุมพื้นที่ทั้งหมด */
+            background-repeat: no-repeat; /* ไม่ให้รูปภาพซ้ำ */
+            background-attachment: fixed; /* ทำให้รูปภาพอยู่กับที่เมื่อเลื่อนหน้าจอ */
+            background-position: center center; /* จัดตำแหน่งรูปภาพให้อยู่ตรงกลาง */
             color: #333;
         }
         .container {
             max-width: 900px; /* Increased max-width for explanations */
             margin: 0 auto;
-            background-color: #fff;
+            background-color: rgba(255, 255, 255, 0.9); /* เพิ่มค่า alpha (0.9) เพื่อให้โปร่งใส 90% */
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
