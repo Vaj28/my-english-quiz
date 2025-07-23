@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบเสียงพยัญชนะท้าย</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #f0f4f8; /* Light blue-grey background */
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #007bb6; /* Strong blue */
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            border-bottom: 2px solid #007bb6;
+            padding-bottom: 10px;
+        }
+        p.instruction {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            color: #555;
+        }
+        h2 {
+            color: #007bb6;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        .quiz-section, .answer-section {
+            border: 1px solid #b3e5fc; /* Light blue border */
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            background-color: #e3f2fd; /* Lighter blue */
+        }
+        .quiz-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            padding: 10px;
+            border-bottom: 1px dashed #c0e0f0;
+        }
+        .quiz-item:last-child {
+            border-bottom: none;
+        }
+        .item-number {
+            font-weight: bold;
+            color: #555;
+            margin-right: 15px;
+            flex-shrink: 0;
+            width: 30px;
+            text-align: right;
+        }
+        .options-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .option {
+            display: flex;
+            align-items: center;
+            margin-right: 25px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            padding: 5px 0;
+        }
+        .option input[type="radio"] {
+            margin-right: 8px;
+            transform: scale(1.2);
+            flex-shrink: 0;
+        }
+        .option .word {
+            font-weight: bold;
+            color: #01579b; /* Darker blue for words */
+            margin-right: 8px; /* Space between word and button */
+        }
+        .play-button { /* Style for the play audio button */
+            background-color: #4caf50; /* Green color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 30px;
+            min-width: 30px;
+        }
+        .play-button:hover:not(:disabled) {
+            background-color: #388e3c;
+        }
+        .play-button::before {
+            content: "▶";
+            margin-right: 3px;
+            font-size: 1.2em;
+        }
+        .play-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .feedback-container {
+            margin-left: auto;
+            flex-basis: 350px;
+            flex-shrink: 0;
+            font-size: 0.95em;
+            padding-left: 10px;
+            text-align: right;
+        }
+        .feedback {
+            font-weight: bold;
+            display: block;
+        }
+        .explanation {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+            display: block;
+        }
+        .correct-feedback {
+            color: green;
+        }
+        .incorrect-feedback {
+            color: red;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background-color: #007bb6;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 0 10px;
+        }
+        button:hover {
+            background-color: #005f8e;
+        }
+        #score-container {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #004d77;
+            padding: 10px;
+            background-color: #e3f2fd;
+            border-radius: 8px;
+        }
+        .disabled-radios input[type="radio"] {
+            pointer-events: none;
+        }
+        /* --- Answer Section Styles --- */
+        .answer-list {
+            list-style: none;
+            padding: 0;
+        }
+        .answer-list li {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px dotted #ccc;
+            font-size: 1.05em;
+        }
+        .answer-list li:last-child {
+            border-bottom: none;
+        }
+        .answer-correct-word {
+            font-weight: bold;
+            color: #007bb6;
+            margin-right: 5px;
+        }
+        .answer-explanation {
+            font-size: 0.95em;
+            color: #666;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>แบบทดสอบเสียงพยัญชนะท้าย</h1>
+        <p class="instruction">คำชี้แจง: ให้นักเรียนเลือกคำที่มีพยัญชนะท้ายคำออกเสียงต่างจากพวก</p>
+
+        <div class="quiz-section">
+            <h2>ส่วนที่ 1: แบบทดสอบ</h2>
+            <form id="quizForm">
+                </form>
+            <div class="button-container">
+                <button type="button" onclick="checkAnswers()">ตรวจคำตอบ</button>
+                <button type="button" onclick="resetQuiz()" style="background-color: #f44336;">ทำแบบทดสอบใหม่</button>
+            </div>
+            <div id="score-container"></div>
+        </div>
+
+        <div class="answer-section" style="display: none;">
+            <h2>ส่วนที่ 2: เฉลยพร้อมคำอธิบาย</h2>
+            <ul class="answer-list" id="fullAnswerList">
+                </ul>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                words: ["cap", "man", "map"],
+                oddOneOut: "man",
+                explanation: "ในชุดนี้ 'man' ลงท้ายด้วยเสียง /n/ ส่วน 'cap' และ 'map' ลงท้ายด้วยเสียง /p/"
+            },
+            {
+                words: ["lamp", "lamb", "camp"],
+                oddOneOut: "lamb",
+                explanation: "ในชุดนี้ 'lamb' ลงท้ายด้วยเสียง /m/ (ตัว 'b' ไม่ออกเสียง) ส่วน 'lamp' และ 'camp' ลงท้ายด้วยเสียง /p/"
+            },
+            {
+                words: ["stone", "rock", "sock"],
+                oddOneOut: "stone",
+                explanation: "ในชุดนี้ 'stone' ลงท้ายด้วยเสียง /n/ ส่วน 'rock' และ 'sock' ลงท้ายด้วยเสียง /k/"
+            },
+            {
+                words: ["sad", "bad", "soft"],
+                oddOneOut: "soft",
+                explanation: "ในชุดนี้ 'soft' ลงท้ายด้วยเสียง /t/ ส่วน 'sad' และ 'bad' ลงท้ายด้วยเสียง /d/"
+            },
+            {
+                words: ["dew", "dark", "shark"],
+                oddOneOut: "dew",
+                explanation: "ในชุดนี้ 'dew' ลงท้ายด้วยเสียงสระ /uː/ หรือ /juː/ (ไม่มีเสียงพยัญชนะท้ายชัดเจน) ส่วน 'dark' และ 'shark' ลงท้ายด้วยเสียง /k/"
+            },
+            {
+                words: ["goat", "road", "toad"],
+                oddOneOut: "goat",
+                explanation: "ในชุดนี้ 'goat' ลงท้ายด้วยเสียง /t/ ส่วน 'road' และ 'toad' ลงท้ายด้วยเสียง /d/"
+            },
+            {
+                words: ["ten", "hen", "hut"],
+                oddOneOut: "hut",
+                explanation: "ในชุดนี้ 'hut' ลงท้ายด้วยเสียง /t/ ส่วน 'ten' และ 'hen' ลงท้ายด้วยเสียง /n/"
+            },
+            {
+                words: ["rob", "top", "chop"],
+                oddOneOut: "rob",
+                explanation: "ในชุดนี้ 'rob' ลงท้ายด้วยเสียง /b/ ส่วน 'top' และ 'chop' ลงท้ายด้วยเสียง /p/"
+            },
+            {
+                words: ["bread", "heel", "head"],
+                oddOneOut: "heel",
+                explanation: "ในชุดนี้ 'heel' ลงท้ายด้วยเสียง /l/ ส่วน 'bread' และ 'head' ลงท้ายด้วยเสียง /d/"
+            },
+            {
+                words: ["class", "clock", "glass"],
+                oddOneOut: "clock",
+                explanation: "ในชุดนี้ 'clock' ลงท้ายด้วยเสียง /k/ ส่วน 'class' และ 'glass' ลงท้ายด้วยเสียง /s/"
+            }
+        ];
+
+        // Speech Synthesis API - Re-used and adapted from previous version
+        const synth = window.speechSynthesis;
+        let voices = [];
+        let speechReady = false; // Flag to indicate if speech synthesis is ready
+
+        function populateVoiceList() {
+            voices = synth.getVoices();
+            const englishVoice = voices.find(voice => voice.lang === 'en-US' || voice.lang === 'en_US');
+            if (englishVoice) {
+                console.log('Web Speech API: English voice found and ready.');
+                speechReady = true;
+            } else {
+                console.warn('Web Speech API: No en-US voice found. Using default or first available English voice.');
+                const anyEnglishVoice = voices.find(voice => voice.lang.startsWith('en-'));
+                if (anyEnglishVoice) {
+                    speechReady = true;
+                } else {
+                    console.error('Web Speech API: No English voices found at all. Speech function might not work.');
+                    speechReady = false;
+                }
+            }
+            // Enable play buttons once voices are loaded
+            document.querySelectorAll('.play-button').forEach(button => {
+                button.disabled = !speechReady;
+            });
+        }
+
+        if (synth && synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = populateVoiceList;
+        } else if (synth) {
+            setTimeout(populateVoiceList, 500); 
+        } else {
+            console.error('Web Speech API is not supported in this browser.');
+            speechReady = false;
+        }
+
+        function speakWord(word) {
+            if (!speechReady) {
+                console.warn('Speech synthesis not ready or no voices available.');
+                alert('ฟังก์ชันเสียงยังไม่พร้อมใช้งานบนเครื่องนี้ กรุณาลองใหม่ภายหลัง หรือตรวจสอบการตั้งค่าเบราว์เซอร์/ระบบปฏิบัติการ');
+                return;
+            }
+
+            if (synth.speaking) {
+                console.log('Already speaking, cancelling current speech.');
+                synth.cancel();
+            }
+
+            const utterThis = new SpeechSynthesisUtterance(word);
+            utterThis.lang = 'en-US';
+
+            const englishVoice = voices.find(voice => voice.lang === 'en-US' || voice.lang === 'en_US');
+            if (englishVoice) {
+                utterThis.voice = englishVoice;
+            }
+
+            utterThis.pitch = 1;
+            utterThis.rate = 1;
+
+            try {
+                synth.speak(utterThis);
+            } catch (error) {
+                console.error('Error speaking word:', error);
+                alert('เกิดข้อผิดพลาดในการเล่นเสียง กรุณาลองใหม่');
+            }
+        }
+
+        const quizForm = document.getElementById('quizForm');
+        const scoreContainer = document.getElementById('score-container');
+        const fullAnswerList = document.getElementById('fullAnswerList');
+        let answered = false;
+
+        function generateQuiz() {
+            console.log('Generating ending sounds quiz...');
+            quizForm.innerHTML = '';
+            quizData.forEach((item, index) => {
+                const quizItem = document.createElement('div');
+                quizItem.classList.add('quiz-item');
+
+                let optionsHtml = '';
+                // Shuffle options to prevent correct answer from always being in the same position
+                const shuffledWords = [...item.words].sort(() => Math.random() - 0.5);
+
+                shuffledWords.forEach((wordOption) => {
+                    optionsHtml += `
+                        <div class="option">
+                            <label>
+                                <input type="radio" name="q${index}" value="${wordOption}">
+                                <span class="word">${wordOption}</span>
+                            </label>
+                            <button type="button" class="play-button" onclick="speakWord('${wordOption}')" disabled></button>
+                        </div>
+                    `;
+                });
+
+                quizItem.innerHTML = `
+                    <span class="item-number">${index + 1}.</span>
+                    <div class="options-container">
+                        ${optionsHtml}
+                    </div>
+                    <div id="feedback-container-${index}" class="feedback-container">
+                        <span id="feedback-${index}" class="feedback"></span>
+                        <span id="explanation-${index}" class="explanation"></span>
+                    </div>
+                `;
+                quizForm.appendChild(quizItem);
+            });
+            scoreContainer.textContent = '';
+            answered = false;
+            fullAnswerList.innerHTML = '';
+            document.querySelector('.answer-section').style.display = 'none';
+
+            // Re-populate voice list after generating buttons, so their disabled state is updated
+            if (synth) {
+                populateVoiceList();
+            }
+        }
+
+        function checkAnswers() {
+            if (answered) return;
+            answered = true;
+
+            let score = 0;
+            quizForm.classList.add('disabled-radios');
+
+            quizData.forEach((item, index) => {
+                const selectedOption = document.querySelector(`input[name="q${index}"]:checked`);
+                const feedbackSpan = document.getElementById(`feedback-${index}`);
+                const explanationSpan = document.getElementById(`explanation-${index}`);
+
+                if (selectedOption) {
+                    if (selectedOption.value === item.oddOneOut) {
+                        feedbackSpan.textContent = "✅ ถูกต้อง!";
+                        feedbackSpan.classList.add('correct-feedback');
+                        feedbackSpan.classList.remove('incorrect-feedback');
+                        score++;
+                    } else {
+                        feedbackSpan.textContent = `❌ ผิดพลาด! (คำตอบที่ถูกต้องคือ: ${item.oddOneOut})`;
+                        feedbackSpan.classList.add('incorrect-feedback');
+                        feedbackSpan.classList.remove('correct-feedback');
+                    }
+                } else {
+                    feedbackSpan.textContent = "❓ ยังไม่ได้เลือกคำตอบ";
+                    feedbackSpan.classList.add('incorrect-feedback');
+                    feedbackSpan.classList.remove('correct-feedback');
+                }
+                explanationSpan.textContent = item.explanation;
+            });
+
+            scoreContainer.textContent = `คะแนนรวมของคุณ: ${score} / ${quizData.length}`;
+            displayFullAnswers();
+        }
+
+        function displayFullAnswers() {
+            fullAnswerList.innerHTML = '';
+            quizData.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span class="answer-correct-word">${index + 1}. ${item.oddOneOut}</span>
+                    <span class="answer-explanation">- ${item.explanation}</span>
+                `;
+                fullAnswerList.appendChild(listItem);
+            });
+            document.querySelector('.answer-section').style.display = 'block';
+        }
+
+        function resetQuiz() {
+            if (synth && synth.speaking) {
+                synth.cancel();
+            }
+            generateQuiz();
+            quizForm.classList.remove('disabled-radios');
+        }
+
+        document.addEventListener('DOMContentLoaded', generateQuiz);
+    </script>
+</body>
+</html>
