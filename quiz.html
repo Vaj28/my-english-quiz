@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>A/An Quiz with Explanations</title>
+    <title>A/An Quiz with Audio & Explanations</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
-            /* ลบ background-color: #f4f4f4; ออก หรือให้เป็นสีสำรองถ้าภาพโหลดไม่ได้ */
             background-image: url('Chin.jpg'); /* ระบุรูปภาพพื้นหลัง */
             background-size: cover; /* ทำให้รูปภาพคลุมพื้นที่ทั้งหมด */
             background-repeat: no-repeat; /* ไม่ให้รูปภาพซ้ำ */
@@ -53,14 +52,39 @@
         .word-container {
             flex-grow: 1;
             display: flex;
-            align-items: center; /* Align word and number */
+            align-items: center; /* Align word, number, and play button */
         }
         .word-container .number {
             margin-right: 5px;
         }
         .word-container .word {
             font-weight: bold;
+            margin-right: 10px; /* Space between word and button */
         }
+        .play-button { /* Style for the play audio button */
+            background-color: #28a745; /* Green color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background-color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 30px; /* Match height of text roughly */
+            min-width: 30px; /* Make it a small square or circle if needed */
+        }
+        .play-button:hover {
+            background-color: #218838; /* Darker green on hover */
+        }
+        .play-button::before { /* Play icon (unicode) */
+            content: "▶";
+            margin-right: 3px;
+            font-size: 1.2em;
+        }
+
         .feedback-container {
             margin-left: 20px;
             flex-basis: 350px; /* Give more space for feedback and explanation */
@@ -146,6 +170,48 @@
             { word: "laptop", answer: "a", explanation: "คำว่า 'laptop' ขึ้นต้นด้วยเสียงพยัญชนะ (แล็บ-ท็อป) จึงใช้ 'a'" }
         ];
 
+        // Speech Synthesis API
+        const synth = window.speechSynthesis;
+        let voices = [];
+
+        function populateVoiceList() {
+            voices = synth.getVoices();
+            // Optional: Find a specific English voice, e.g., 'Google US English'
+            // If you want a specific accent, you might need to iterate and find it
+            // For now, it will use the default English voice available.
+        }
+
+        // Event listener for when voices are loaded
+        if (synth.onvoiceschanged !== undefined) {
+            synth.onvoiceschanged = populateVoiceList;
+        } else {
+            // Fallback for browsers that don't fire onvoiceschanged immediately
+            populateVoiceList();
+        }
+
+        function speakWord(word) {
+            if (synth.speaking) {
+                console.log('Already speaking...');
+                synth.cancel(); // Stop current speech if any
+            }
+
+            const utterThis = new SpeechSynthesisUtterance(word);
+            utterThis.lang = 'en-US'; // Set language to US English
+            
+            // Try to find a specific voice, if desired
+            // const englishVoice = voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Google US English'));
+            // if (englishVoice) {
+            //     utterThis.voice = englishVoice;
+            // } else {
+            //     console.warn("Google US English voice not found, using default English voice.");
+            // }
+
+            utterThis.pitch = 1; // Default pitch
+            utterThis.rate = 1;  // Default rate
+
+            synth.speak(utterThis);
+        }
+
         const quizForm = document.getElementById('quizForm');
         const scoreContainer = document.getElementById('score-container');
         let answered = false;
@@ -163,7 +229,9 @@
                         <input type="radio" name="q${index}" value="an"> an
                     </label>
                     <div class="word-container">
-                        <span class="number">${index + 1}.</span> <span class="word">________ ${item.word}</span>
+                        <span class="number">${index + 1}.</span>
+                        <span class="word">________ ${item.word}</span>
+                        <button type="button" class="play-button" onclick="speakWord('${item.word}')"></button>
                     </div>
                     <div id="feedback-container-${index}" class="feedback-container">
                         <span id="feedback-${index}" class="feedback"></span>
@@ -217,6 +285,7 @@
         }
 
         function resetQuiz() {
+            synth.cancel(); // Stop any ongoing speech
             generateQuiz();
             quizForm.classList.remove('disabled-radios');
         }
