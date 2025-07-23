@@ -76,13 +76,17 @@
             height: 30px; /* Match height of text roughly */
             min-width: 30px; /* Make it a small square or circle if needed */
         }
-        .play-button:hover {
+        .play-button:hover:not(:disabled) { /* Only hover if not disabled */
             background-color: #218838; /* Darker green on hover */
         }
         .play-button::before { /* Play icon (unicode) */
             content: "▶";
             margin-right: 3px;
             font-size: 1.2em;
+        }
+        .play-button:disabled { /* Style for disabled button */
+            background-color: #cccccc; /* Greyed out */
+            cursor: not-allowed;
         }
 
         .feedback-container {
@@ -173,43 +177,74 @@
         // Speech Synthesis API
         const synth = window.speechSynthesis;
         let voices = [];
+        let speechReady = false; // Flag to indicate if speech synthesis is ready
 
         function populateVoiceList() {
             voices = synth.getVoices();
-            // Optional: Find a specific English voice, e.g., 'Google US English'
-            // If you want a specific accent, you might need to iterate and find it
-            // For now, it will use the default English voice available.
+            // Try to find a specific English voice for consistency
+            const englishVoice = voices.find(voice => voice.lang === 'en-US' || voice.lang === 'en_US');
+            if (englishVoice) {
+                console.log('Web Speech API: English voice found and ready.');
+                speechReady = true;
+            } else {
+                console.warn('Web Speech API: No en-US voice found. Using default or first available English voice.');
+                // Fallback to any English voice if specific en-US not found
+                const anyEnglishVoice = voices.find(voice => voice.lang.startsWith('en-'));
+                if (anyEnglishVoice) {
+                    speechReady = true;
+                } else {
+                    console.error('Web Speech API: No English voices found at all. Speech function might not work.');
+                    speechReady = false;
+                }
+            }
+            // Enable play buttons once voices are loaded
+            document.querySelectorAll('.play-button').forEach(button => {
+                button.disabled = !speechReady;
+            });
         }
 
-        // Event listener for when voices are loaded
-        if (synth.onvoiceschanged !== undefined) {
+        // Event listener for when voices are loaded/changed
+        if (synth && synth.onvoiceschanged !== undefined) {
             synth.onvoiceschanged = populateVoiceList;
-        } else {
+        } else if (synth) {
             // Fallback for browsers that don't fire onvoiceschanged immediately
-            populateVoiceList();
+            // Try to populate after a short delay
+            setTimeout(populateVoiceList, 500); 
+        } else {
+            console.error('Web Speech API is not supported in this browser.');
+            speechReady = false;
         }
 
         function speakWord(word) {
+            if (!speechReady) {
+                console.warn('Speech synthesis not ready or no voices available.');
+                alert('ฟังก์ชันเสียงยังไม่พร้อมใช้งานบนเครื่องนี้ กรุณาลองใหม่ภายหลัง หรือตรวจสอบการตั้งค่าเบราว์เซอร์/ระบบปฏิบัติการ');
+                return;
+            }
+
             if (synth.speaking) {
-                console.log('Already speaking...');
+                console.log('Already speaking, cancelling current speech.');
                 synth.cancel(); // Stop current speech if any
             }
 
             const utterThis = new SpeechSynthesisUtterance(word);
             utterThis.lang = 'en-US'; // Set language to US English
-            
-            // Try to find a specific voice, if desired
-            // const englishVoice = voices.find(voice => voice.lang === 'en-US' && voice.name.includes('Google US English'));
-            // if (englishVoice) {
-            //     utterThis.voice = englishVoice;
-            // } else {
-            //     console.warn("Google US English voice not found, using default English voice.");
-            // }
+
+            // Try to use a specific English voice if found
+            const englishVoice = voices.find(voice => voice.lang === 'en-US' || voice.lang === 'en_US');
+            if (englishVoice) {
+                utterThis.voice = englishVoice;
+            }
 
             utterThis.pitch = 1; // Default pitch
             utterThis.rate = 1;  // Default rate
 
-            synth.speak(utterThis);
+            try {
+                synth.speak(utterThis);
+            } catch (error) {
+                console.error('Error speaking word:', error);
+                alert('เกิดข้อผิดพลาดในการเล่นเสียง กรุณาลองใหม่');
+            }
         }
 
         const quizForm = document.getElementById('quizForm');
@@ -217,6 +252,7 @@
         let answered = false;
 
         function generateQuiz() {
+            console.log('Generating quiz...');
             quizForm.innerHTML = ''; // Clear previous items if any
             quizData.forEach((item, index) => {
                 const quizItem = document.createElement('div');
@@ -231,7 +267,7 @@
                     <div class="word-container">
                         <span class="number">${index + 1}.</span>
                         <span class="word">________ ${item.word}</span>
-                        <button type="button" class="play-button" onclick="speakWord('${item.word}')"></button>
+                        <button type="button" class="play-button" onclick="speakWord('${item.word}')" disabled></button>
                     </div>
                     <div id="feedback-container-${index}" class="feedback-container">
                         <span id="feedback-${index}" class="feedback"></span>
@@ -242,6 +278,11 @@
             });
             scoreContainer.textContent = '';
             answered = false;
+            // After generating, try to populate voices again in case they weren't ready
+            // or if quiz was reset and voices need re-check.
+            if (synth) {
+                populateVoiceList(); 
+            }
         }
 
         function checkAnswers() {
@@ -285,7 +326,9 @@
         }
 
         function resetQuiz() {
-            synth.cancel(); // Stop any ongoing speech
+            if (synth && synth.speaking) {
+                synth.cancel(); // Stop any ongoing speech
+            }
             generateQuiz();
             quizForm.classList.remove('disabled-radios');
         }
