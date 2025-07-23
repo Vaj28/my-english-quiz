@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบเติมสระ A, E, I, O, U</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+            background-color: #e0f7fa; /* Light cyan background */
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 980px; /* Increased max-width */
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #00796b; /* Dark teal */
+            margin-bottom: 25px;
+            font-size: 2.2em;
+            border-bottom: 2px solid #009688; /* Teal border */
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #00796b;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+        .quiz-section, .answer-section {
+            border: 1px solid #b2dfdb; /* Light teal border */
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            background-color: #e0f2f7; /* Lighter teal */
+        }
+        .quiz-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+            padding: 10px;
+            border-bottom: 1px dashed #c0e6ea;
+        }
+        .quiz-item:last-child {
+            border-bottom: none;
+        }
+        .quiz-item .item-number {
+            font-weight: bold;
+            color: #555;
+            margin-right: 10px;
+            flex-shrink: 0;
+            width: 30px; /* Give fixed width to number */
+        }
+        .quiz-word-elements { /* Container for letters and inputs */
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-right: 15px;
+        }
+        .quiz-word-elements > .char-box, /* For existing characters */
+        .quiz-word-elements > input { /* For input fields */
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            width: 30px; /* Fixed width for each box */
+            height: 30px;
+            text-align: center;
+            font-size: 1.1em;
+            border: 1px solid #80cbc4;
+            border-radius: 4px;
+            margin: 0 2px;
+            box-sizing: border-box; /* Include padding/border in width/height */
+        }
+        .quiz-word-elements > .char-box { /* Styles for existing letters */
+            font-weight: bold;
+            color: #004d40;
+            background-color: #f0f8f8; /* Light background for existing letters */
+        }
+        .quiz-word-elements > input { /* Styles for input fields */
+            text-transform: lowercase; /* Ensure input is lowercase */
+            background-color: #f7feff;
+        }
+        /* --- Styles for spaces between word parts --- */
+        .quiz-word-elements > .word-space {
+            width: 15px; /* Adjust width of the space */
+            height: 30px; /* Match height of boxes */
+            margin: 0 2px;
+            /* No border or background for spaces */
+        }
+
+        /* --- New Styles for Input Feedback --- */
+        .quiz-word-elements > input.correct-input {
+            background-color: #e6ffe6; /* Light green background */
+            color: green; /* Green text */
+            border-color: green;
+        }
+        .quiz-word-elements > input.incorrect-input {
+            background-color: #ffe6e6; /* Light red background */
+            color: red; /* Red text */
+            border-color: red;
+        }
+        /* --- End New Styles --- */
+
+        .thai-meaning-container { /* Container for meaning */
+            display: flex;
+            align-items: center;
+            margin-left: 5px; /* Adjust margin to ensure separation */
+            color: #666;
+            flex-shrink: 0;
+        }
+        .thai-meaning-container .equals-sign {
+            margin-right: 5px; /* Space between = and text */
+        }
+
+        .feedback-container {
+            margin-left: auto; /* Push to the right */
+            flex-basis: 350px; /* Space for feedback */
+            flex-shrink: 0;
+            font-size: 0.95em;
+            padding-left: 10px; /* Space from other elements */
+        }
+        .feedback {
+            font-weight: bold;
+            display: block;
+        }
+        .explanation {
+            font-size: 0.9em;
+            color: #555;
+            margin-top: 5px;
+            display: block;
+        }
+        .correct {
+            color: green;
+        }
+        .incorrect {
+            color: red;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1.1em;
+            background-color: #009688; /* Teal button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 0 10px;
+        }
+        button:hover {
+            background-color: #00796b; /* Darker teal on hover */
+        }
+        #score-container {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #004d40; /* Darkest teal */
+            padding: 10px;
+            background-color: #e0f7fa;
+            border-radius: 8px;
+        }
+        .disabled-inputs input {
+            pointer-events: none;
+            background-color: #eceff1; /* Grey out disabled inputs */
+        }
+        /* Keep text color for disabled correct/incorrect inputs */
+        .disabled-inputs input.correct-input {
+            color: green;
+        }
+        .disabled-inputs input.incorrect-input {
+            color: red;
+        }
+
+        .answer-list {
+            list-style: none;
+            padding: 0;
+        }
+        .answer-list li {
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px dotted #ccc;
+            font-size: 1.05em;
+        }
+        .answer-list li:last-child {
+            border-bottom: none;
+        }
+        .answer-correct-word {
+            font-weight: bold;
+            color: #00796b; /* Dark teal */
+            margin-right: 5px;
+        }
+        .answer-explanation {
+            font-size: 0.95em;
+            color: #666;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>แบบทดสอบเติมสระ A, E, I, O, U</h1>
+        <p>คำชี้แจง: ให้นักเรียนเติม a, e, i, o, u ลงในช่องว่างให้ถูกต้อง</p>
+
+        <div class="quiz-section">
+            <h2>ส่วนที่ 1: แบบทดสอบ</h2>
+            <form id="quizForm">
+                </form>
+            <div class="button-container">
+                <button type="button" onclick="checkAnswers()">ตรวจคำตอบ</button>
+                <button type="button" onclick="resetQuiz()" style="background-color: #e74c3c;">ทำแบบทดสอบใหม่</button>
+            </div>
+            <div id="score-container"></div>
+        </div>
+
+        <div class="answer-section" style="display: none;"> <h2>ส่วนที่ 2: เฉลยพร้อมคำอธิบาย</h2>
+            <ul class="answer-list" id="fullAnswerList">
+                </ul>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            // template: ใช้ _ แทนช่องว่างที่ต้องเติม. ไม่ต้องใส่ช่องว่างระหว่าง _ กับ _ หรือตัวอักษรอื่นแล้ว!
+            //           ถ้าต้องการ "ช่องว่าง" ระหว่างกลุ่มตัวอักษร ให้ใช้ | (pipe) symbol แทน เช่น "char|char"
+            // correctVowels: สระที่ถูกต้องเรียงตามลำดับช่องว่าง
+            // fullWord: คำเต็มที่ถูกต้อง
+            // meaning: ความหมายภาษาไทย
+            // explanation: คำอธิบายเพิ่มเติม
+            { template: "r__d", correctVowels: "oa", fullWord: "road", meaning: "ถนน", explanation: "'Road' สะกดด้วย r-o-a-d (โอ-เอ) หมายถึงถนน" },
+            { template: "l_k_", correctVowels: "ae", fullWord: "lake", meaning: "ทะเลสาบ", explanation: "'Lake' สะกดด้วย l-a-k-e (เอ-เคะ) หมายถึงทะเลสาบ" },
+            { template: "_c__n", correctVowels: "oea", fullWord: "ocean", meaning: "มหาสมุทร", explanation: "'Ocean' สะกดด้วย o-c-e-a-n (โอ-เชี่ยน) หมายถึงมหาสมุทร" },
+            { template: "b__ch", correctVowels: "ea", fullWord: "beach", meaning: "ชายหาด", explanation: "'Beach' สะกดด้วย b-e-a-ch (บีช) หมายถึงชายหาด" },
+            { template: "s_nd", correctVowels: "a", fullWord: "sand", meaning: "ทราย", explanation: "'Sand' สะกดด้วย s-a-n-d (แซนด์) หมายถึงทราย" },
+            { template: "d_s_rt", correctVowels: "ee", fullWord: "desert", meaning: "ทะเลทราย", explanation: "'Desert' สะกดด้วย d-e-s-e-r-t (เด-เสิร์ท) หมายถึงทะเลทราย" },
+            { template: "ch_rc__l", correctVowels: "aoa", fullWord: "charcoal", meaning: "ถ่าน", explanation: "'Charcoal' สะกดด้วย ch-a-r-c-o-a-l (ชาร์โคล) หมายถึงถ่าน" },
+            { template: "d_w", correctVowels: "e", fullWord: "dew", meaning: "น้ำค้าง", explanation: "'Dew' สะกดด้วย d-e-w (ดิว) หมายถึงน้ำค้าง" },
+            { template: "w_t_rf_ll", correctVowels: "aea", fullWord: "waterfall", meaning: "น้ำตก", explanation: "'Waterfall' สะกดด้วย w-a-t-e-r-f-a-l-l (วอเทอร์ฟอล) หมายถึงน้ำตก" },
+            { template: "c__ntrys_d_", correctVowels: "ouie", fullWord: "countryside", meaning: "ชนบท", explanation: "'Countryside' สะกดด้วย c-o-u-n-t-r-y-s-i-d-e (คันทรีไซด์) หมายถึงชนบท" }
+        ];
+
+        const quizForm = document.getElementById('quizForm');
+        const scoreContainer = document.getElementById('score-container');
+        const fullAnswerList = document.getElementById('fullAnswerList');
+        let answered = false;
+
+        function generateQuiz() {
+            quizForm.innerHTML = '';
+            quizData.forEach((item, index) => {
+                const quizItem = document.createElement('div');
+                quizItem.classList.add('quiz-item');
+
+                let wordElementsHtml = '';
+                let inputCounter = 0;
+                // Iterate through the template string to build the word structure
+                for (let i = 0; i < item.template.length; i++) {
+                    const char = item.template.charAt(i);
+                    if (char === '_') {
+                        // If it's an underscore, create an input field
+                        wordElementsHtml += `<input type="text" maxlength="1" data-index="${index}" data-input-id="${inputCounter++}">`;
+                    } else if (char === '|') { // Use '|' for a visual space without a box
+                        wordElementsHtml += `<span class="word-space"></span>`;
+                    }
+                    else { // If it's any other character (a consonant)
+                        // Create a span with char-box class for actual existing characters
+                        wordElementsHtml += `<span class="char-box">${char}</span>`;
+                    }
+                }
+                
+                quizItem.innerHTML = `
+                    <span class="item-number">${index + 1}.</span>
+                    <div class="quiz-word-elements">
+                        ${wordElementsHtml}
+                    </div>
+                    <div class="thai-meaning-container">
+                        <span class="equals-sign">=</span>
+                        <span>${item.meaning}</span>
+                    </div>
+                    <div id="feedback-container-${index}" class="feedback-container">
+                        <span id="feedback-${index}" class="feedback"></span>
+                        <span id="explanation-${index}" class="explanation"></span>
+                    </div>
+                `;
+                quizForm.appendChild(quizItem);
+            });
+            scoreContainer.textContent = '';
+            answered = false;
+            fullAnswerList.innerHTML = '';
+            document.querySelector('.answer-section').style.display = 'none';
+        }
+
+        function checkAnswers() {
+            if (answered) return;
+            answered = true;
+
+            let score = 0;
+            quizForm.classList.add('disabled-inputs'); // Disable inputs after checking
+
+            quizData.forEach((item, index) => {
+                const inputs = document.querySelectorAll(`input[data-index="${index}"]`);
+                let userAnswer = '';
+                // Check each individual input field
+                inputs.forEach((input, inputIdx) => {
+                    const correctVowelForThisInput = item.correctVowels.charAt(inputIdx);
+                    const inputValue = input.value.toLowerCase();
+
+                    if (inputValue === correctVowelForThisInput) {
+                        input.classList.add('correct-input');
+                        input.classList.remove('incorrect-input');
+                        userAnswer += inputValue; // Accumulate correct answer for overall check
+                    } else {
+                        input.classList.add('incorrect-input');
+                        input.classList.remove('correct-input');
+                        userAnswer += inputValue; // Still accumulate for overall check
+                    }
+                });
+
+                const feedbackSpan = document.getElementById(`feedback-${index}`);
+                const explanationSpan = document.getElementById(`explanation-${index}`);
+
+                // Check overall answer for scoring and main feedback message
+                if (userAnswer === item.correctVowels) {
+                    feedbackSpan.textContent = "✅ ถูกต้อง!";
+                    feedbackSpan.classList.add('correct');
+                    feedbackSpan.classList.remove('incorrect');
+                    score++;
+                } else {
+                    feedbackSpan.textContent = `❌ ผิดพลาด! (เฉลย: ${item.correctVowels.split('').join(', ')})`;
+                    feedbackSpan.classList.add('incorrect');
+                    feedbackSpan.classList.remove('correct');
+                }
+                explanationSpan.textContent = `คำเต็ม: ${item.fullWord}. ${item.explanation}`;
+            });
+
+            scoreContainer.textContent = `คะแนนรวมของคุณ: ${score} / ${quizData.length}`;
+            displayFullAnswers();
+        }
+
+        function displayFullAnswers() {
+            fullAnswerList.innerHTML = '';
+            quizData.forEach((item, index) => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span class="answer-correct-word">${index + 1}. ${item.fullWord}</span>
+                    <span class="answer-explanation">(${item.meaning}) - ${item.explanation}</span>
+                `;
+                fullAnswerList.appendChild(listItem);
+            });
+            document.querySelector('.answer-section').style.display = 'block';
+        }
+
+        function resetQuiz() {
+            generateQuiz();
+            quizForm.classList.remove('disabled-inputs');
+        }
+
+        document.addEventListener('DOMContentLoaded', generateQuiz);
+    </script>
+</body>
+</html>
